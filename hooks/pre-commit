@@ -1,0 +1,23 @@
+#!/bin/bash
+
+echo "🔍 Vérification pre-commit en cours..."
+
+# Vérification 1 : pas de fichier .log en staging
+if git diff --cached --name-only | grep -q "\.log$"; then
+  echo "❌ ERREUR : Des fichiers .log sont en staging. Retirez-les avant de commiter."
+  exit 1
+fi
+
+# Vérification 2 : pas de console.log dans les fichiers .js
+JS_FILES=$(git diff --cached --name-only | grep "\.js$")
+if [ -n "$JS_FILES" ]; then
+  for file in $JS_FILES; do
+    if grep -q "console\.log" "$file"; then
+      echo "❌ ERREUR : '$file' contient un console.log. Supprimez-le avant de commiter."
+      exit 1
+    fi
+  done
+fi
+
+echo "✅ Vérifications pre-commit réussies."
+exit 0
